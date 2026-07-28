@@ -1,0 +1,248 @@
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+
+    <div class="mb-4">
+
+      <a
+        href="/reservations"
+        class="text-decoration-none text-muted"
+      >
+        <i class="bi bi-arrow-left me-1"></i>
+        Volver a reservas
+      </a>
+
+    </div>
+
+    <div class="card border-0 shadow-sm">
+
+      <div class="card-body p-4">
+
+        <h1 class="h3 fw-bold mb-1">
+          Nueva reserva
+        </h1>
+
+        <p class="text-muted mb-4">
+          Registra una nueva reserva para el restaurante.
+        </p>
+
+        <% if (error) { %>
+
+          <div class="alert alert-danger">
+            <%= error %>
+          </div>
+
+        <% } %>
+
+        <% if (clients.length === 0) { %>
+
+          <div class="alert alert-warning">
+            Debes registrar al menos un cliente antes de crear una reserva.
+          </div>
+
+        <% } %>
+
+        <% if (tables.length === 0) { %>
+
+          <div class="alert alert-warning">
+            Debes registrar al menos una mesa antes de crear una reserva.
+          </div>
+
+        <% } %>
+
+        <form action="/reservations" method="POST">
+
+          <div class="row g-3">
+
+            <div class="col-md-6">
+
+              <label class="form-label">
+                Cliente *
+              </label>
+
+              <select
+                name="client_id"
+                class="form-select"
+                required
+              >
+
+                <option value="">
+                  Selecciona un cliente
+                </option>
+
+                <% clients.forEach(client => { %>
+
+                  <option
+                    value="<%= client.id %>"
+                    <%= Number(reservation.client_id) === client.id ? "selected" : "" %>
+                  >
+                    <%= client.first_name %>
+                    <%= client.last_name %>
+                  </option>
+
+                <% }) %>
+
+              </select>
+
+            </div>
+
+            <div class="col-md-6">
+
+              <label class="form-label">
+                Mesa *
+              </label>
+
+              <select
+                name="table_id"
+                class="form-select"
+                required
+              >
+
+                <option value="">
+                  Selecciona una mesa
+                </option>
+
+                <% tables.forEach(table => { %>
+
+                  <option
+                    value="<%= table.id %>"
+                    <%= Number(reservation.table_id) === table.id ? "selected" : "" %>
+                  >
+                    Mesa <%= table.table_number %>
+                    - <%= table.capacity %> personas
+                    - <%= table.location %>
+                  </option>
+
+                <% }) %>
+
+              </select>
+
+            </div>
+
+            <div class="col-md-6">
+
+              <label class="form-label">
+                Fecha *
+              </label>
+
+              <input
+                type="date"
+                name="reservation_date"
+                class="form-control"
+                value="<%= reservation.reservation_date || '' %>"
+                required
+              >
+
+            </div>
+
+            <div class="col-md-6">
+
+              <label class="form-label">
+                Hora *
+              </label>
+
+              <input
+                type="time"
+                name="reservation_time"
+                class="form-control"
+                value="<%= reservation.reservation_time || '' %>"
+                required
+              >
+
+            </div>
+
+            <div class="col-md-6">
+
+              <label class="form-label">
+                Cantidad de personas *
+              </label>
+
+              <input
+                type="number"
+                name="people"
+                min="1"
+                class="form-control"
+                value="<%= reservation.people || '' %>"
+                required
+              >
+
+            </div>
+
+            <div class="col-md-6">
+
+              <label class="form-label">
+                Estado *
+              </label>
+
+              <select
+                name="status"
+                class="form-select"
+                required
+              >
+
+                <% [
+                  "Pendiente",
+                  "Confirmada",
+                  "En curso",
+                  "Completada",
+                  "Cancelada",
+                  "No asistió"
+                ].forEach(status => { %>
+
+                  <option
+                    value="<%= status %>"
+                    <%= reservation.status === status ? "selected" : "" %>
+                  >
+                    <%= status %>
+                  </option>
+
+                <% }) %>
+
+              </select>
+
+            </div>
+
+            <div class="col-12">
+
+              <label class="form-label">
+                Solicitudes especiales
+              </label>
+
+              <textarea
+                name="special_requests"
+                class="form-control"
+                rows="4"
+                placeholder="Ejemplo: mesa cerca de la ventana, cumpleaños, silla para bebé..."
+              ><%= reservation.special_requests || '' %></textarea>
+
+            </div>
+
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a
+              href="/reservations"
+              class="btn btn-outline-secondary"
+            >
+              Cancelar
+            </a>
+
+            <button
+              type="submit"
+              class="btn btn-dark"
+              <%= clients.length === 0 || tables.length === 0 ? "disabled" : "" %>
+            >
+              <i class="bi bi-calendar-check me-1"></i>
+              Guardar reserva
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
