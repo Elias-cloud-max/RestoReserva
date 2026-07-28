@@ -25,6 +25,23 @@ function initializeDatabase() {
     )
   `;
 
+  const createReservationsTable = `
+    CREATE TABLE IF NOT EXISTS reservations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      client_id INTEGER NOT NULL,
+      table_id INTEGER NOT NULL,
+      reservation_date TEXT NOT NULL,
+      reservation_time TEXT NOT NULL,
+      people INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'Pendiente',
+      special_requests TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+      FOREIGN KEY (client_id) REFERENCES clients(id),
+      FOREIGN KEY (table_id) REFERENCES tables(id)
+    )
+  `;
+
   db.run(createClientsTable, (error) => {
     if (error) {
       console.error("Error al crear la tabla clients:", error.message);
@@ -41,6 +58,18 @@ function initializeDatabase() {
     }
 
     console.log("Tabla tables lista.");
+  });
+
+  db.run(createReservationsTable, (error) => {
+    if (error) {
+      console.error(
+        "Error al crear la tabla reservations:",
+        error.message
+      );
+      return;
+    }
+
+    console.log("Tabla reservations lista.");
   });
 }
 
