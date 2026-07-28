@@ -2,6 +2,8 @@ const path = require("path");
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const methodOverride = require("method-override");
+const initializeDatabase = require("./config/initializeDatabase");
+const clientRoutes = require("./routes/clientRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,10 +30,14 @@ app.get("/", (req, res) => {
   });
 });
 
+app.use("/clients", clientRoutes);
+
 // Página 404
 app.use((req, res) => {
   res.status(404).send("Página no encontrada");
 });
+
+initializeDatabase();
 
 app.listen(PORT, () => {
   console.log(`RestoReserve ejecutándose en http://localhost:${PORT}`);
