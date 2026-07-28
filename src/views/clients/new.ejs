@@ -1,0 +1,107 @@
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+
+    <div class="mb-4">
+      <a href="/clients" class="text-decoration-none text-muted">
+        <i class="bi bi-arrow-left me-1"></i>
+        Volver a clientes
+      </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+
+        <h1 class="h3 fw-bold mb-1">
+          Nuevo cliente
+        </h1>
+
+        <p class="text-muted mb-4">
+          Registra la información básica del cliente.
+        </p>
+
+        <% if (error) { %>
+          <div class="alert alert-danger">
+            <%= error %>
+          </div>
+        <% } %>
+
+        <form action="/clients" method="POST">
+
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label">Nombre *</label>
+
+              <input
+                type="text"
+                name="first_name"
+                class="form-control"
+                value="<%= client.first_name || '' %>"
+                required
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Apellido *</label>
+
+              <input
+                type="text"
+                name="last_name"
+                class="form-control"
+                value="<%= client.last_name || '' %>"
+                required
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Teléfono *</label>
+
+              <input
+                type="tel"
+                name="phone"
+                class="form-control"
+                value="<%= client.phone || '' %>"
+                required
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Correo electrónico</label>
+
+              <input
+                type="email"
+                name="email"
+                class="form-control"
+                value="<%= client.email || '' %>"
+              >
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Observaciones</label>
+
+              <textarea
+                name="notes"
+                class="form-control"
+                rows="4"
+              ><%= client.notes || '' %></textarea>
+            </div>
+
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <a href="/clients" class="btn btn-outline-secondary">
+              Cancelar
+            </a>
+
+            <button type="submit" class="btn btn-dark">
+              <i class="bi bi-check-lg me-1"></i>
+              Guardar cliente
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
