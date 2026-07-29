@@ -37,6 +37,12 @@ function validateReservation(reservation, table, excludeId, callback) {
     return callback("La cantidad de personas debe ser mayor que cero.");
   }
 
+  if (table.status !== "Disponible") {
+  return callback(
+    "La mesa seleccionada no está disponible para realizar reservas."
+  );
+}
+
   if (reservation.people > table.capacity) {
     return callback(
       `La mesa seleccionada tiene capacidad para ${table.capacity} personas.`
