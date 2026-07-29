@@ -11,6 +11,23 @@ class Client {
     db.all(sql, [], callback);
   }
 
+  static search(term, callback) {
+  const sql = `
+    SELECT *
+    FROM clients
+    WHERE
+      first_name LIKE ?
+      OR last_name LIKE ?
+      OR phone LIKE ?
+      OR email LIKE ?
+    ORDER BY id DESC
+  `;
+
+  const value = `%${term}%`;
+
+  db.all(sql, [value, value, value, value], callback);
+}
+
   static getById(id, callback) {
     const sql = `
       SELECT *
