@@ -171,6 +171,30 @@ class Reservation {
     db.run(sql, [id], callback);
   }
 
+  static getActiveFutureByTable(tableId, callback) {
+    const sql = `
+      SELECT
+        reservations.*,
+        clients.first_name,
+        clients.last_name
+      FROM reservations
+      INNER JOIN clients
+        ON reservations.client_id = clients.id
+      WHERE reservations.table_id = ?
+        AND reservations.reservation_date >= DATE('now', 'localtime')
+        AND reservations.status IN (
+          'Pendiente',
+          'Confirmada',
+          'En curso'
+        )
+      ORDER BY
+        reservations.reservation_date ASC,
+        reservations.reservation_time ASC
+    `;
+
+    db.all(sql, [tableId], callback);
+  }
+
   static findConflict(
     tableId,
     date,
