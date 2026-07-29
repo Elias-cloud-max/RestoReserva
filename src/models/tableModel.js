@@ -11,6 +11,43 @@ class Table {
     db.all(sql, [], callback);
   }
 
+  static filter(filters, callback) {
+    let sql = `
+      SELECT *
+      FROM tables
+      WHERE 1 = 1
+    `;
+
+    const values = [];
+
+    if (filters.status) {
+      sql += `
+        AND status = ?
+      `;
+      values.push(filters.status);
+    }
+
+    if (filters.location) {
+      sql += `
+        AND location = ?
+      `;
+      values.push(filters.location);
+    }
+
+  if (filters.capacity) {
+  sql += `
+    AND capacity >= ?
+  `;
+  values.push(filters.capacity);
+}
+
+    sql += `
+      ORDER BY table_number ASC
+    `;
+
+    db.all(sql, values, callback);
+  }
+
   static getById(id, callback) {
     const sql = `
       SELECT *

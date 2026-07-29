@@ -1,6 +1,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <h1 class="fw-bold mb-1">Mesas</h1>
+
     <p class="text-muted mb-0">
       Gestiona las mesas disponibles en el restaurante.
     </p>
@@ -12,30 +13,173 @@
   </a>
 </div>
 
+
+<!-- Filtros -->
+<form method="GET" action="/tables" class="mb-4">
+
+  <div class="row g-2">
+
+    <div class="col-md-3">
+
+      <select
+        name="status"
+        class="form-select"
+      >
+        <option value="">
+          Todos los estados
+        </option>
+
+        <% [
+          "Disponible",
+          "Ocupada",
+          "Fuera de servicio"
+        ].forEach(status => { %>
+
+          <option
+            value="<%= status %>"
+            <%= typeof filters !== "undefined" && filters.status === status ? "selected" : "" %>
+          >
+            <%= status %>
+          </option>
+
+        <% }) %>
+
+      </select>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+      <select
+        name="location"
+        class="form-select"
+      >
+        <option value="">
+          Todas las ubicaciones
+        </option>
+
+        <% [
+          "Interior",
+          "Terraza",
+          "Exterior",
+          "Área VIP"
+        ].forEach(location => { %>
+
+          <option
+            value="<%= location %>"
+            <%= typeof filters !== "undefined" && filters.location === location ? "selected" : "" %>
+          >
+            <%= location %>
+          </option>
+
+        <% }) %>
+
+      </select>
+
+    </div>
+
+
+    <div class="col-md-3">
+
+      <input
+        type="number"
+        name="capacity"
+        min="1"
+        class="form-control"
+        placeholder="Capacidad mínima"
+        value="<%= typeof filters !== 'undefined' && filters.capacity ? filters.capacity : '' %>"
+      >
+
+    </div>
+
+
+    <div class="col-md-3 d-flex gap-2">
+
+      <button
+        type="submit"
+        class="btn btn-dark flex-grow-1"
+      >
+        <i class="bi bi-funnel me-1"></i>
+        Filtrar
+      </button>
+
+      <% if (
+        typeof filters !== "undefined" &&
+        (filters.status || filters.location || filters.capacity)
+      ) { %>
+
+        <a
+          href="/tables"
+          class="btn btn-outline-secondary"
+        >
+          Limpiar
+        </a>
+
+      <% } %>
+
+    </div>
+
+  </div>
+
+</form>
+
+
+<!-- Listado -->
 <div class="card border-0 shadow-sm">
   <div class="card-body">
 
     <% if (tables.length === 0) { %>
 
       <div class="text-center py-5">
+
         <i class="bi bi-grid display-4 text-muted"></i>
 
-        <h2 class="h5 mt-3">
-          No hay mesas registradas
-        </h2>
+        <% if (
+          typeof filters !== "undefined" &&
+          (filters.status || filters.location || filters.capacity)
+        ) { %>
 
-        <p class="text-muted">
-          Registra la primera mesa para comenzar.
-        </p>
+          <h2 class="h5 mt-3">
+            No se encontraron mesas
+          </h2>
 
-        <a href="/tables/new" class="btn btn-dark">
-          Registrar mesa
-        </a>
+          <p class="text-muted">
+            No hay mesas que coincidan con los filtros seleccionados.
+          </p>
+
+          <a
+            href="/tables"
+            class="btn btn-outline-dark"
+          >
+            Ver todas las mesas
+          </a>
+
+        <% } else { %>
+
+          <h2 class="h5 mt-3">
+            No hay mesas registradas
+          </h2>
+
+          <p class="text-muted">
+            Registra la primera mesa para comenzar.
+          </p>
+
+          <a
+            href="/tables/new"
+            class="btn btn-dark"
+          >
+            Registrar mesa
+          </a>
+
+        <% } %>
+
       </div>
 
     <% } else { %>
 
       <div class="table-responsive">
+
         <table class="table align-middle">
 
           <thead>
@@ -49,11 +193,15 @@
           </thead>
 
           <tbody>
+
             <% tables.forEach(table => { %>
 
               <tr>
+
                 <td>
-                  <strong>Mesa <%= table.table_number %></strong>
+                  <strong>
+                    Mesa <%= table.table_number %>
+                  </strong>
                 </td>
 
                 <td>
@@ -65,19 +213,27 @@
                 </td>
 
                 <td>
+
                   <% if (table.status === "Disponible") { %>
+
                     <span class="badge text-bg-success">
                       Disponible
                     </span>
+
                   <% } else if (table.status === "Ocupada") { %>
+
                     <span class="badge text-bg-danger">
                       Ocupada
                     </span>
+
                   <% } else { %>
+
                     <span class="badge text-bg-secondary">
                       <%= table.status %>
                     </span>
+
                   <% } %>
+
                 </td>
 
                 <td class="text-end">
@@ -85,6 +241,7 @@
                   <a
                     href="/tables/<%= table.id %>/edit"
                     class="btn btn-sm btn-outline-dark"
+                    title="Editar mesa"
                   >
                     <i class="bi bi-pencil"></i>
                   </a>
@@ -95,18 +252,27 @@
                     class="d-inline"
                     onsubmit="return confirm('¿Deseas eliminar esta mesa?')"
                   >
-                    <button class="btn btn-sm btn-outline-danger">
+
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-outline-danger"
+                      title="Eliminar mesa"
+                    >
                       <i class="bi bi-trash"></i>
                     </button>
+
                   </form>
 
                 </td>
+
               </tr>
 
             <% }) %>
+
           </tbody>
 
         </table>
+
       </div>
 
     <% } %>
