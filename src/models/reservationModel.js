@@ -14,10 +14,75 @@ class Reservation {
         ON reservations.client_id = clients.id
       INNER JOIN tables
         ON reservations.table_id = tables.id
-      ORDER BY reservation_date ASC, reservation_time ASC
+      ORDER BY
+        reservation_date ASC,
+        reservation_time ASC
     `;
 
     db.all(sql, [], callback);
+  }
+
+  static filter(filters, callback) {
+    let sql = `
+      SELECT
+        reservations.*,
+        clients.first_name,
+        clients.last_name,
+        tables.table_number,
+        tables.capacity
+      FROM reservations
+      INNER JOIN clients
+        ON reservations.client_id = clients.id
+      INNER JOIN tables
+        ON reservations.table_id = tables.id
+      WHERE 1 = 1
+    `;
+
+    const values = [];
+
+    if (filters.status) {
+      sql += `
+        AND reservations.status = ?
+      `;
+
+      values.push(filters.status);
+    }
+
+    if (filters.date) {
+      sql += `
+        AND reservations.reservation_date = ?
+      `;
+
+      values.push(filters.date);
+    }
+
+    if (filters.search) {
+      sql += `
+        AND (
+          clients.first_name LIKE ?
+          OR clients.last_name LIKE ?
+          OR (
+            clients.first_name || ' ' || clients.last_name
+          ) LIKE ?
+        )
+      `;
+
+      const searchValue = `%${filters.search}%`;
+
+      values.push(
+        searchValue,
+        searchValue,
+        searchValue
+      );
+    }
+
+    sql += `
+      ORDER BY
+        reservations.reservation_date ASC,
+        reservations.reservation_time ASC
+    `;
+
+    db.all(sql, values, callback);
   }
 
   static getById(id, callback) {
@@ -98,31 +163,51 @@ class Reservation {
   }
 
   static delete(id, callback) {
-    db.run(
-      "DELETE FROM reservations WHERE id = ?",
-      [id],
-      callback
-    );
+    const sql = `
+      DELETE FROM reservations
+      WHERE id = ?
+    `;
+
+    db.run(sql, [id], callback);
   }
 
-  static findConflict(tableId, date, time, excludeId, callback) {
+  static findConflict(
+    tableId,
+    date,
+    time,
+    excludeId,
+    callback
+  ) {
     let sql = `
       SELECT *
       FROM reservations
       WHERE table_id = ?
         AND reservation_date = ?
         AND reservation_time = ?
-        AND status NOT IN ('Cancelada', 'Completada', 'No asistió')
+        AND status NOT IN (
+          'Cancelada',
+          'Completada',
+          'No asistió'
+        )
     `;
 
-    const values = [tableId, date, time];
+    const values = [
+      tableId,
+      date,
+      time
+    ];
 
     if (excludeId) {
-      sql += " AND id != ?";
+      sql += `
+        AND id != ?
+      `;
+
       values.push(excludeId);
     }
 
-    sql += " LIMIT 1";
+    sql += `
+      LIMIT 1
+    `;
 
     db.get(sql, values, callback);
   }
