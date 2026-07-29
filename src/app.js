@@ -6,7 +6,7 @@ const initializeDatabase = require("./config/initializeDatabase");
 const clientRoutes = require("./routes/clientRoutes");
 const tableRoutes = require("./routes/tableRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
-
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,13 +26,8 @@ app.use(methodOverride("_method"));
 // Archivos públicos
 app.use(express.static(path.join(__dirname, "../public")));
 
-// Página principal
-app.get("/", (req, res) => {
-  res.render("dashboard/index", {
-    title: "Panel principal"
-  });
-});
 
+app.use("/", dashboardRoutes);
 app.use("/clients", clientRoutes);
 app.use("/tables", tableRoutes);
 app.use("/reservations", reservationRoutes);
