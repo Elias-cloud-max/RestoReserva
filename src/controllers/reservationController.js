@@ -68,18 +68,36 @@ function validateReservation(reservation, table, excludeId, callback) {
 
 const reservationController = {
   index(req, res) {
-    Reservation.getAll((error, reservations) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).send("Error al obtener las reservas.");
-      }
+  const filters = {
+    search: req.query.search?.trim() || "",
+    status: req.query.status?.trim() || "",
+    date: req.query.date?.trim() || ""
+  };
 
-      res.render("reservations/index", {
-        title: "Reservas",
-        reservations
-      });
+  const hasFilters =
+    filters.search ||
+    filters.status ||
+    filters.date;
+
+  const callback = (error, reservations) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).send("Error al obtener las reservas.");
+    }
+
+    res.render("reservations/index", {
+      title: "Reservas",
+      reservations,
+      filters
     });
-  },
+  };
+
+  if (hasFilters) {
+    Reservation.filter(filters, callback);
+  } else {
+    Reservation.getAll(callback);
+  }
+},
 
   newForm(req, res) {
     getFormData((error, data) => {

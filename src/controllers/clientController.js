@@ -1,19 +1,29 @@
 const Client = require("../models/clientModel");
 
 const clientController = {
-  index(req, res) {
-    Client.getAll((error, clients) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).send("Error al obtener los clientes.");
-      }
+index(req, res) {
+  const search = req.query.search?.trim() || "";
 
-      res.render("clients/index", {
-        title: "Clientes",
-        clients
-      });
+  const callback = (error, clients) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).send("Error al obtener los clientes.");
+    }
+
+    res.render("clients/index", {
+      title: "Clientes",
+      clients,
+      search
     });
-  },
+  };
+
+  if (search) {
+    Client.search(search, callback);
+  } else {
+    Client.getAll(callback);
+  }
+},
+
 
   newForm(req, res) {
     res.render("clients/new", {

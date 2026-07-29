@@ -13,6 +13,112 @@
   </a>
 </div>
 
+
+<!-- Filtros de reservas -->
+<form method="GET" action="/reservations" class="mb-4">
+
+  <div class="row g-2">
+
+    <div class="col-lg-4">
+
+      <div class="input-group">
+
+        <span class="input-group-text">
+          <i class="bi bi-search"></i>
+        </span>
+
+        <input
+          type="text"
+          name="search"
+          class="form-control"
+          placeholder="Buscar por nombre del cliente..."
+          value="<%= typeof filters !== 'undefined' ? filters.search || '' : '' %>"
+        >
+
+      </div>
+
+    </div>
+
+
+    <div class="col-lg-3">
+
+      <select
+        name="status"
+        class="form-select"
+      >
+
+        <option value="">
+          Todos los estados
+        </option>
+
+        <% [
+          "Pendiente",
+          "Confirmada",
+          "En curso",
+          "Completada",
+          "Cancelada",
+          "No asistió"
+        ].forEach(status => { %>
+
+          <option
+            value="<%= status %>"
+            <%= typeof filters !== "undefined" && filters.status === status ? "selected" : "" %>
+          >
+            <%= status %>
+          </option>
+
+        <% }) %>
+
+      </select>
+
+    </div>
+
+
+    <div class="col-lg-3">
+
+      <input
+        type="date"
+        name="date"
+        class="form-control"
+        value="<%= typeof filters !== 'undefined' ? filters.date || '' : '' %>"
+      >
+
+    </div>
+
+
+    <div class="col-lg-2 d-flex gap-2">
+
+      <button
+        type="submit"
+        class="btn btn-dark flex-grow-1"
+      >
+        <i class="bi bi-funnel me-1"></i>
+        Filtrar
+      </button>
+
+      <% if (
+        typeof filters !== "undefined" &&
+        (filters.search || filters.status || filters.date)
+      ) { %>
+
+        <a
+          href="/reservations"
+          class="btn btn-outline-secondary"
+          title="Limpiar filtros"
+        >
+          <i class="bi bi-x-lg"></i>
+        </a>
+
+      <% } %>
+
+    </div>
+
+  </div>
+
+</form>
+
+
+<!-- Listado de reservas -->
 <div class="card border-0 shadow-sm">
   <div class="card-body">
 
@@ -22,17 +128,41 @@
 
         <i class="bi bi-calendar-x display-4 text-muted"></i>
 
-        <h2 class="h5 mt-3">
-          No hay reservas registradas
-        </h2>
+        <% if (
+          typeof filters !== "undefined" &&
+          (filters.search || filters.status || filters.date)
+        ) { %>
 
-        <p class="text-muted">
-          Registra la primera reserva para comenzar.
-        </p>
+          <h2 class="h5 mt-3">
+            No se encontraron reservas
+          </h2>
 
-        <a href="/reservations/new" class="btn btn-dark">
-          Crear reserva
-        </a>
+          <p class="text-muted">
+            No hay reservas que coincidan con los filtros seleccionados.
+          </p>
+
+          <a
+            href="/reservations"
+            class="btn btn-outline-dark"
+          >
+            Ver todas las reservas
+          </a>
+
+        <% } else { %>
+
+          <h2 class="h5 mt-3">
+            No hay reservas registradas
+          </h2>
+
+          <p class="text-muted">
+            Registra la primera reserva para comenzar.
+          </p>
+
+          <a href="/reservations/new" class="btn btn-dark">
+            Crear reserva
+          </a>
+
+        <% } %>
 
       </div>
 
@@ -97,6 +227,12 @@
                       Pendiente
                     </span>
 
+                  <% } else if (reservation.status === "En curso") { %>
+
+                    <span class="badge text-bg-info">
+                      En curso
+                    </span>
+
                   <% } else if (reservation.status === "Cancelada") { %>
 
                     <span class="badge text-bg-danger">
@@ -107,6 +243,12 @@
 
                     <span class="badge text-bg-primary">
                       Completada
+                    </span>
+
+                  <% } else if (reservation.status === "No asistió") { %>
+
+                    <span class="badge text-bg-secondary">
+                      No asistió
                     </span>
 
                   <% } else { %>
@@ -124,6 +266,7 @@
                   <a
                     href="/reservations/<%= reservation.id %>/edit"
                     class="btn btn-sm btn-outline-dark"
+                    title="Editar reserva"
                   >
                     <i class="bi bi-pencil"></i>
                   </a>
@@ -135,7 +278,11 @@
                     onsubmit="return confirm('¿Deseas eliminar esta reserva?')"
                   >
 
-                    <button class="btn btn-sm btn-outline-danger">
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-outline-danger"
+                      title="Eliminar reserva"
+                    >
                       <i class="bi bi-trash"></i>
                     </button>
 
