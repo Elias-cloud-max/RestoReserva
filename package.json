@@ -1,7 +1,7 @@
 {
   "name": "restoreserva",
   "version": "1.0.0",
-  "description": "",
+  "description": "Sistema web de gestión de reservas para restaurantes",
   "main": "index.js",
  "scripts": {
   "start": "node src/app.js",
