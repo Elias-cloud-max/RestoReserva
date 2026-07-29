@@ -1,37 +1,63 @@
 const Table = require("../models/tableModel");
+const Reservation = require("../models/reservationModel");
+
+function updateTable(id, table, res) {
+  Table.update(id, table, (error) => {
+    if (error) {
+      console.error(error);
+
+      let message = "No fue posible actualizar la mesa.";
+
+      if (error.message.includes("UNIQUE")) {
+        message = "Ya existe otra mesa con ese número.";
+      }
+
+      return res.status(400).render("tables/edit", {
+        title: "Editar mesa",
+        error: message,
+        table: {
+          id,
+          ...table
+        }
+      });
+    }
+
+    res.redirect("/tables");
+  });
+}
 
 const tableController = {
   index(req, res) {
-  const filters = {
-    status: req.query.status?.trim() || "",
-    location: req.query.location?.trim() || "",
-    capacity: Number(req.query.capacity) || ""
-  };
+    const filters = {
+      status: req.query.status?.trim() || "",
+      location: req.query.location?.trim() || "",
+      capacity: Number(req.query.capacity) || ""
+    };
 
-  const hasFilters =
-    filters.status ||
-    filters.location ||
-    filters.capacity;
+    const hasFilters =
+      filters.status ||
+      filters.location ||
+      filters.capacity;
 
-  const callback = (error, tables) => {
-    if (error) {
-      console.error(error);
-      return res.status(500).send("Error al obtener las mesas.");
+    const callback = (error, tables) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).send("Error al obtener las mesas.");
+      }
+
+      res.render("tables/index", {
+        title: "Mesas",
+        tables,
+        filters
+      });
+    };
+
+    if (hasFilters) {
+      Table.filter(filters, callback);
+    } else {
+      Table.getAll(callback);
     }
-
-    res.render("tables/index", {
-      title: "Mesas",
-      tables,
-      filters
-    });
-  };
-
-  if (hasFilters) {
-    Table.filter(filters, callback);
-  } else {
-    Table.getAll(callback);
-  }
-},
+  },
 
   newForm(req, res) {
     res.render("tables/new", {
@@ -159,28 +185,40 @@ const tableController = {
       });
     }
 
-    Table.update(id, table, (error) => {
-      if (error) {
-        console.error(error);
+    if (table.status === "Fuera de servicio") {
+      Reservation.getActiveFutureByTable(
+        id,
+        (reservationError, reservations) => {
+          if (reservationError) {
+            console.error(reservationError);
 
-        let message = "No fue posible actualizar la mesa.";
-
-        if (error.message.includes("UNIQUE")) {
-          message = "Ya existe otra mesa con ese número.";
-        }
-
-        return res.status(400).render("tables/edit", {
-          title: "Editar mesa",
-          error: message,
-          table: {
-            id,
-            ...table
+            return res.status(500).send(
+              "Error al comprobar las reservas de la mesa."
+            );
           }
-        });
-      }
 
-      res.redirect("/tables");
-    });
+          if (reservations.length > 0) {
+            return res.status(400).render("tables/edit", {
+              title: "Editar mesa",
+              error:
+                `No se puede poner esta mesa fuera de servicio porque tiene ` +
+                `${reservations.length} reserva(s) futura(s) activa(s). ` +
+                `Reasigna o cancela esas reservas antes de continuar.`,
+              table: {
+                id,
+                ...table
+              }
+            });
+          }
+
+          updateTable(id, table, res);
+        }
+      );
+
+      return;
+    }
+
+    updateTable(id, table, res);
   },
 
   delete(req, res) {
