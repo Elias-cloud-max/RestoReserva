@@ -2,18 +2,36 @@ const Table = require("../models/tableModel");
 
 const tableController = {
   index(req, res) {
-    Table.getAll((error, tables) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).send("Error al obtener las mesas.");
-      }
+  const filters = {
+    status: req.query.status?.trim() || "",
+    location: req.query.location?.trim() || "",
+    capacity: Number(req.query.capacity) || ""
+  };
 
-      res.render("tables/index", {
-        title: "Mesas",
-        tables
-      });
+  const hasFilters =
+    filters.status ||
+    filters.location ||
+    filters.capacity;
+
+  const callback = (error, tables) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).send("Error al obtener las mesas.");
+    }
+
+    res.render("tables/index", {
+      title: "Mesas",
+      tables,
+      filters
     });
-  },
+  };
+
+  if (hasFilters) {
+    Table.filter(filters, callback);
+  } else {
+    Table.getAll(callback);
+  }
+},
 
   newForm(req, res) {
     res.render("tables/new", {
